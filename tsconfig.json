@@ -1,0 +1,41 @@
+{
+    "version": "2.9.2",
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "dist/",
+        "isolatedModules": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declaration": true,
+        "noImplicitAny": true,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "inlineSources": true,
+        "sourceMap": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "downlevelIteration": true,
+        "module": "es6",
+        "lib": [
+            "dom",
+            "es2015.promise",
+            "es5"
+        ],
+        "typeRoots": [
+            "@types",
+        ]
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "./**/*.tsx",
+        "!./node_modules/**/*"
+    ],
+    "exclude": [
+        "@types",
+    ]
+}
