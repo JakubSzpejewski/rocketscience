@@ -56,7 +56,6 @@ export class Game {
 
     public gameOver(): void {
         this.gameObjects = [];
-        this.points = 0;
         this.state = GameState.over;
     }
 
