@@ -1,5 +1,6 @@
 import { Missile } from "../missile/missile";
 import { GameObject } from "../utils/gameObject";
+import { game } from "../../index";
 
 
 const PIXELS_FROM_POSITION: number = 20;
@@ -15,10 +16,14 @@ const ACCELERATION: number = 0.1;
 const MAX_SPEED: number = 6;
 const MIN_SPEED: number = 0;
 
-const SHOOT_INTERVAL: number = 1000;
+const SHOOT_INTERVAL: number = 500;
+
+
 
 export class Rocket extends GameObject {
+    public priority: number = 0;
     public tag: string = 'rocket';
+    public shape: p5.Vector[];
 
     public position: p5.Vector;
     public direction: p5.Vector;
@@ -40,16 +45,21 @@ export class Rocket extends GameObject {
         this.direction = new p5.Vector(Math.sin(this.angle), -Math.cos(this.angle));
         this.direction.normalize();
         this.position.add(p5.Vector.mult(this.direction, this.speed));
+        this.shape = [
+            new p5.Vector(this.position.x, this.position.y),
+            new p5.Vector(this.position.x - PIXELS_FROM_POSITION, this.position.y + PIXELS_FROM_POSITION * 2),
+            new p5.Vector(this.position.x, this.position.y + PIXELS_FROM_POSITION * 1.5),
+            new p5.Vector(this.position.x + PIXELS_FROM_POSITION, this.position.y + PIXELS_FROM_POSITION * 2)
+        ];
     }
 
     public draw(p: p5): void {
-        p.fill('#ffffff');
         p.push();
+        p.fill('#ffffff');
         p.translate(this.position.x, this.position.y);
         p.rotate(this.angle);
         p.translate(-this.position.x, -this.position.y);
-        p.quad(this.position.x, this.position.y, this.position.x - PIXELS_FROM_POSITION, this.position.y + PIXELS_FROM_POSITION * 2, this.position.x,
-            this.position.y + PIXELS_FROM_POSITION * 1.5, this.position.x + PIXELS_FROM_POSITION, this.position.y + PIXELS_FROM_POSITION * 2);
+        p.quad(this.shape[0].x, this.shape[0].y, this.shape[1].x, this.shape[1].y, this.shape[2].x, this.shape[2].y, this.shape[3].x, this.shape[3].y);
         p.pop();
     }
 
@@ -84,5 +94,16 @@ export class Rocket extends GameObject {
 
     private shoot(): void {
         new Missile(new p5.Vector(this.position.x, this.position.y), this.direction.copy());
+    }
+
+    public onCollision(gameObject: GameObject): boolean {
+        switch (gameObject.tag) {
+            case 'asteroid': {
+                //TODO
+                game.points = 0;
+                break;
+            }
+        }
+        return false;
     }
 }
