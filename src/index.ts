@@ -1,4 +1,4 @@
-import { Game } from './game/game';
+import { Game, GameState } from './game/game';
 import { Hud } from './game/hud/hud';
 
 export const CANVAS_WIDTH: number = 1500;
@@ -19,9 +19,22 @@ new p5((p: p5) => {
 
         p.background(51);
 
-        game.update(p);
-        game.draw(p);
+        if (game.state === GameState.running) {
+            game.update(p);
+            game.draw(p);
 
-        hud.draw(p);
+            hud.drawPoints(p);
+        } else if (game.state === GameState.notRunning) {
+            hud.menu(p);
+            if (p.keyIsDown(13)) {
+                game.startGame();
+            }
+        } else if (game.state === GameState.over) {
+            hud.gameOver(p);
+            if (p.keyIsDown(13)) {
+                game.startGame();
+            }
+        }
+
     }
 });

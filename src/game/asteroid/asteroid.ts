@@ -79,6 +79,7 @@ export class Asteroid extends GameObject {
         p.push();
         p.noFill();
         p.beginShape();
+        p.stroke('#000000');
         for (const point of this.shape) {
             p.vertex(point.x, point.y);
         }

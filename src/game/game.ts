@@ -2,10 +2,12 @@ import { GameObject } from "./utils/gameObject";
 import { Rocket } from "./rocket/rocket";
 import { Asteroid } from "./asteroid/asteroid";
 import { collidePolyPoly } from "./utils/collisions";
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../index";
 
 const ASTEROID_COUNT: number = 30;
 
 export enum GameState {
+    notRunning,
     running,
     over,
 }
@@ -15,10 +17,12 @@ export class Game {
 
     public points: number = 0;
 
+    private debug = false;
+
+    public state: GameState = GameState.notRunning;
+
     constructor() {
-        setTimeout(() => {
-            new Rocket(200, 200)
-        }, 0);
+
     }
 
     public checkCollisions(): void {
@@ -40,8 +44,19 @@ export class Game {
                 }
             }
         }
+    }
 
+    public startGame(): void {
+        this.state = GameState.running;
+        setTimeout(() => {
+            new Rocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
+        }, 0);
+    }
 
+    public gameOver(): void {
+        this.gameObjects = [];
+        this.points = 0;
+        this.state = GameState.over;
     }
 
     public update(p: p5): void {
@@ -56,7 +71,18 @@ export class Game {
 
     public draw(p: p5): void {
         for (const gameObject of this.gameObjects) {
+            if (this.debug) {
+                p.noFill();
+                p.strokeWeight(3);
+                p.beginShape();
+                p.stroke('#00ff00')
+                for (const vertix of gameObject.shape) {
+                    p.vertex(vertix.x, vertix.y);
+                }
+                p.endShape(p.CLOSE);
+            }
             gameObject.draw(p);
+
         }
     }
 }

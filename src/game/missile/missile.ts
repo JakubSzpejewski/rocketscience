@@ -25,13 +25,15 @@ export class Missile extends GameObject {
         this.count++;
         this.direction.normalize();
         this.position.add(p5.Vector.mult(this.direction, 10))
-        this.shape = [new p5.Vector(this.position.x, this.position.y), new p5.Vector(this.position.x + 5, this.position.y + 5)];
+        this.shape = [new p5.Vector(this.position.x, this.position.y), new p5.Vector(this.position.x + 10, this.position.y),
+        new p5.Vector(this.position.x + 10, this.position.y), new p5.Vector(this.position.x + 10, this.position.y + 10)];
     }
 
     public draw(p: p5): void {
         p.push();
         p.fill('#ffffff');
-        p.ellipse(this.position.x, this.position.y, 10);
+        p.stroke('#ffffff');
+        p.rect(this.position.x, this.position.y, 10, 10);
 
         p.pop();
     }
