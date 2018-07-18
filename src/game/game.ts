@@ -47,6 +47,7 @@ export class Game {
     }
 
     public startGame(): void {
+        this.points = 0;
         this.state = GameState.running;
         setTimeout(() => {
             new Rocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
