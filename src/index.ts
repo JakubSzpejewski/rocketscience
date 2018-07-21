@@ -5,7 +5,7 @@ import { } from 'seedrandom';
 export const CANVAS_WIDTH: number = 1500;
 export const CANVAS_HEIGHT: number = 1000;
 export const CANVAS_OFFSET: number = 100;
-export let game: Game = new Game(false);
+export let game: Game = new Game();
 
 
 

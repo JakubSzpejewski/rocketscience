@@ -2,7 +2,8 @@ import { game, CANVAS_HEIGHT, CANVAS_WIDTH } from "../../index";
 import { PIXELS_FROM_POSITION, Rocket, ANGLE_SPEED } from "../../game/rocket/rocket";
 import { Arm, ARM_LENGTH } from "./arm";
 import { Layer, Network, Neuron } from 'synaptic';
-import { generate, Genome } from "../genetic/genome";
+import { Genome } from "../genetic/genome";
+import { GeneticUnit } from "../genetic/population";
 
 export const ARMS_QUANTITY = 16;
 export const HIDDEN_LAYER = 10;
@@ -13,11 +14,11 @@ export class AiRocket extends Rocket {
     private perceptron: Network;
 
     constructor(
-        x: number, y: number, genome?: Genome,
+        x: number, y: number, geneticUnit: GeneticUnit,
     ) {
         super(x, y);
 
-        this.perceptron = this.createPerceptron(genome);
+        this.perceptron = geneticUnit.perceptron || this.createPerceptron(geneticUnit.genome);
         for (let i = 0; i < ARMS_QUANTITY; i++) {
             this.arms[i] = new Arm(2 * Math.PI / ARMS_QUANTITY * i);
         }
@@ -35,16 +36,10 @@ export class AiRocket extends Rocket {
         });
     }
 
-    private createPerceptron(genome?: Genome): Network {
+    private createPerceptron(genome: Genome): Network {
         const inputs = new Layer(ARMS_QUANTITY);
         const hidden = new Layer(HIDDEN_LAYER);
         const output = new Layer(OUTPUTS);
-
-        if (!genome) {
-            genome = generate(ARMS_QUANTITY * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS);
-        }
-
-
 
         inputs.project(hidden, Layer.connectionType.ALL_TO_ALL);
         hidden.project(output, Layer.connectionType.ALL_TO_ALL);
@@ -104,5 +99,9 @@ export class AiRocket extends Rocket {
         if (Math.round(output[3])) {
             this.shoot(p);
         }
+    }
+
+    public getFitness(): number {
+        return game.points;
     }
 }

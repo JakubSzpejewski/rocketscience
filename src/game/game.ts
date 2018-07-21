@@ -4,6 +4,7 @@ import { Asteroid } from "./asteroid/asteroid";
 import { collidePolyPoly } from "./utils/collisions";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../index";
 import { AiRocket } from "../ai/rocket/rocket";
+import { GeneticUnit } from "../ai/genetic/population";
 
 const ASTEROID_COUNT: number = 30;
 
@@ -28,8 +29,11 @@ export class Game {
     private onGameOverFunctions: (() => void)[] = [];
 
     constructor(
-        private isHuman: boolean = true,
+        private geneticUnit?: GeneticUnit,
     ) {
+        if (geneticUnit) {
+            (<any>Math).seedrandom(geneticUnit.randomSeed);
+        }
 
     }
 
@@ -71,10 +75,10 @@ export class Game {
         this.points = 0;
         this.state = GameState.running;
 
-        if(this.isHuman) {
+        if (!this.geneticUnit) {
             new Rocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
         } else {
-            new AiRocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+            new AiRocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, this.geneticUnit);
         }
 
         for (const fn of this.onStartFunctions) {
