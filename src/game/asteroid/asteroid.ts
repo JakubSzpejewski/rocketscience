@@ -100,17 +100,13 @@ export class Asteroid extends GameObject {
 
         const vertices: p5.Vector[] = [];
 
-        const angles: number[] = (<any>Array).from({ length: defaultPointsQuantity }, () => this.random(0, 360)).sort((x: number, y: number) => x - y);
+        const angles: number[] = (<any>Array).from({ length: defaultPointsQuantity }, () => this.random(0, 2 * Math.PI)).sort((x: number, y: number) => x - y);
 
         for (let i = 0; i < defaultPointsQuantity; i++) {
             const length = this.random((this.size * DEFAULT_SIZE), (this.size * DEFAULT_SIZE) * 2);
-            vertices.push(new p5.Vector(length * Math.cos(this.toRadians(angles[i])), length * Math.sin(this.toRadians(angles[i]))));
+            vertices.push(new p5.Vector(length * Math.cos(angles[i]), length * Math.sin(angles[i])));
         }
         return vertices;
-    }
-
-    private toRadians(angle: number): number {
-        return angle * (Math.PI / 180);
     }
 
     private checkOutOfBounds(): boolean {

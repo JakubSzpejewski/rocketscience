@@ -1,18 +1,18 @@
 import { Missile } from "../missile/missile";
 import { GameObject } from "../utils/gameObject";
 import { game, CANVAS_HEIGHT, CANVAS_WIDTH } from "../../index";
-import { collidePolyPoly } from "../../game/utils/collisions";
+import { collidePolyPoly } from "../utils/collisions";
 
 
-const PIXELS_FROM_POSITION: number = 20;
+export const PIXELS_FROM_POSITION: number = 20;
 
-const LEFT_ARROW: number = 39;
-const RIGHT_ARROW: number = 37;
-const UP_ARROW: number = 38;
-const X_KEY: number = 88;
+// const LEFT_ARROW: number = 39;
+// const RIGHT_ARROW: number = 37;
+// const UP_ARROW: number = 38;
+// const X_KEY: number = 88;
 
 
-const ANGLE_SPEED: number = 0.1;
+export const ANGLE_SPEED: number = 0.1;
 const ACCELERATION: number = 0.1;
 const MAX_SPEED: number = 6;
 const MIN_SPEED: number = 0;
@@ -85,34 +85,48 @@ export class Rocket extends GameObject {
 
     private lastShotTime: number = 0;
 
-    private processInput(p: p5): void {
-        if (p.keyIsDown(RIGHT_ARROW)) {
-            this.angle -= ANGLE_SPEED;
-        }
-        if (p.keyIsDown(LEFT_ARROW)) {
-            this.angle += ANGLE_SPEED;
-        }
+    private processInput(_p: p5): void {
+        // if (p.keyIsDown(RIGHT_ARROW)) {
+        //     this.changeAngle(-ANGLE_SPEED);
+        // }
+        // if (p.keyIsDown(LEFT_ARROW)) {
+        //     this.changeAngle(ANGLE_SPEED);
+        // }
 
 
-        if (p.keyIsDown(UP_ARROW)) {
-            if (this.speed < MAX_SPEED) {
-                this.speed += ACCELERATION;
-            }
-        } else {
-            if (this.speed > MIN_SPEED) {
-                this.speed -= ACCELERATION;
-            }
-        }
+        // if (p.keyIsDown(UP_ARROW)) {
+        //     this.accelerate();
+        // } else {
+        //     this.decelerate();
+        // }
 
 
-        if (p.keyIsDown(X_KEY) && this.lastShotTime + SHOOT_INTERVAL < p.millis()) {
-            this.lastShotTime = p.millis();
-            this.shoot();
+        // if (p.keyIsDown(X_KEY)) {
+        //     this.shoot(p);
+        // }
+    }
+
+    public accelerate(): void {
+        if (this.speed < MAX_SPEED) {
+            this.speed += ACCELERATION;
         }
     }
 
-    private shoot(): void {
-        new Missile(new p5.Vector(this.position.x, this.position.y - PIXELS_FROM_POSITION), this.direction.copy());
+    public decelerate(): void {
+        if (this.speed > MIN_SPEED) {
+            this.speed -= ACCELERATION;
+        }
+    }
+
+    public changeAngle(diff: number): void {
+        this.angle += diff;
+    }
+
+    public shoot(p: p5): void {
+        if (this.lastShotTime + SHOOT_INTERVAL < p.millis()) {
+            this.lastShotTime = p.millis();
+            new Missile(new p5.Vector(this.position.x, this.position.y - PIXELS_FROM_POSITION), this.direction.copy());
+        }
     }
 
     public onDestroy(): void {

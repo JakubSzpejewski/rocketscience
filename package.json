@@ -16,6 +16,7 @@
     "synaptic": "^1.1.4"
   },
   "devDependencies": {
+    "@types/seedrandom": "^2.4.27",
     "@webpack-cli/init": "0.0.8",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",

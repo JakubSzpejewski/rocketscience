@@ -57,6 +57,47 @@ const collideLinePoly = (x1: number, y1: number, x2: number, y2: number, vertice
     return false;
 }
 
+export const collideLinePolyWithIntersectionPoint = (x1: number, y1: number, x2: number, y2: number, vertices: p5.Vector[]) => {
+
+    // go through each of the vertices, plus the next vertex in the list
+    let next = 0;
+    for (let current = 0; current < vertices.length; current++) {
+
+        // get next vertex in list if we've hit the end, wrap around to 0
+        next = current + 1;
+        if (next == vertices.length) next = 0;
+
+        // get the PVectors at our current position extract X/Y coordinates from each
+        const x3 = vertices[current].x;
+        const y3 = vertices[current].y;
+        const x4 = vertices[next].x;
+        const y4 = vertices[next].y;
+
+        const collided = collideLineLineWithIntersection(x1, y1, x2, y2, x3, y3, x4, y4);
+        if (collided) {
+            return collided;
+        }
+    }
+    // never got a hit
+    return undefined;
+}
+
+const collideLineLineWithIntersection = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number) => {
+
+
+    // calculate the distance to intersection point
+    var uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+    var uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+
+    // if uA and uB are between 0-1, lines are colliding
+    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+        return {
+            x: x1 + (uA * (x2 - x1)),
+            y: y1 + (uA * (y2 - y1))
+        }
+    }
+    return undefined
+}
 const collideLineLine = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number) => {
     // calculate the distance to intersection point
     var uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));

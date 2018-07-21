@@ -3,6 +3,7 @@ import { Rocket } from "./rocket/rocket";
 import { Asteroid } from "./asteroid/asteroid";
 import { collidePolyPoly } from "./utils/collisions";
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../index";
+import { AiRocket } from "../ai/rocket/rocket";
 
 const ASTEROID_COUNT: number = 30;
 
@@ -21,7 +22,14 @@ export class Game {
 
     public state: GameState = GameState.notRunning;
 
-    constructor() {
+    private onStartFunctions: (() => void)[] = [];
+    private onDrawFunctions: ((p: p5) => void)[] = [];
+    private onUpdateFunctions: ((p: p5) => void)[] = [];
+    private onGameOverFunctions: (() => void)[] = [];
+
+    constructor(
+        private isHuman: boolean = true,
+    ) {
 
     }
 
@@ -46,15 +54,38 @@ export class Game {
         }
     }
 
+    public registerOnStart(...functions: (() => void)[]): void {
+        this.onStartFunctions.push(...functions);
+    }
+    public registerOnDraw(...functions: ((p: p5) => void)[]): void {
+        this.onDrawFunctions.push(...functions);
+    }
+    public registerOnUpdate(...functions: ((p: p5) => void)[]): void {
+        this.onUpdateFunctions.push(...functions);
+    }
+    public registerOnGameOver(...functions: (() => void)[]): void {
+        this.onGameOverFunctions.push(...functions);
+    }
+
     public startGame(): void {
         this.points = 0;
         this.state = GameState.running;
-        setTimeout(() => {
-            new Rocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
-        }, 0);
+
+        if(this.isHuman) {
+            new Rocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        } else {
+            new AiRocket(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+        }
+
+        for (const fn of this.onStartFunctions) {
+            fn();
+        }
     }
 
     public gameOver(): void {
+        for (const fn of this.onGameOverFunctions) {
+            fn();
+        }
         this.gameObjects = [];
         this.state = GameState.over;
     }
@@ -66,6 +97,9 @@ export class Game {
         }
         for (const gameObject of this.gameObjects) {
             gameObject.update(p);
+        }
+        for (const fn of this.onUpdateFunctions) {
+            fn(p);
         }
     }
 
@@ -82,7 +116,9 @@ export class Game {
                 p.endShape(p.CLOSE);
             }
             gameObject.draw(p);
-
+        }
+        for (const fn of this.onDrawFunctions) {
+            fn(p);
         }
     }
 }
