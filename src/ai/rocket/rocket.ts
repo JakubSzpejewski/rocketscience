@@ -11,14 +11,14 @@ export const OUTPUTS = 4;
 
 export class AiRocket extends Rocket {
     public arms: Arm[] = [];
-    private perceptron: Network;
+    public perceptron: Network;
 
     constructor(
         x: number, y: number, geneticUnit: GeneticUnit,
     ) {
         super(x, y);
 
-        this.perceptron = geneticUnit.perceptron || this.createPerceptron(geneticUnit.genome);
+        this.perceptron = this.createPerceptron(geneticUnit.genome);
         for (let i = 0; i < ARMS_QUANTITY; i++) {
             this.arms[i] = new Arm(2 * Math.PI / ARMS_QUANTITY * i);
         }

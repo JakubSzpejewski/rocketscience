@@ -12,9 +12,7 @@ export const generate = (length: number): Genome => {
 export const mutate = (genome: Genome, chance: number): Genome => {
     const ret: Genome = [];
     for (let v of genome) {
-        if (Math.random() < chance) {
-            ret.push(-v);
-        }
+        ret.push(Math.random() < chance ? -v : v);
     }
     return ret;
 }

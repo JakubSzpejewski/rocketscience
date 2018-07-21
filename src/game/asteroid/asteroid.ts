@@ -124,7 +124,6 @@ export class Asteroid extends GameObject {
     }
 
     public onCollision(gameObject: GameObject): boolean {
-        console.log(gameObject);
         switch (gameObject.tag) {
             case 'missile': {
                 this.onDestroy();

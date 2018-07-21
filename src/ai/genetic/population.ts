@@ -8,7 +8,7 @@ const CHANCE_TO_MUTATE = 0.05;
 
 export interface GeneticUnit {
     genome: Genome;
-    randomSeed: string;
+    randomSeed?: string;
     perceptron?: Network
     fitness?: number;
 }
@@ -29,9 +29,9 @@ export class Population {
         }
     }
 
-    private newUnit(base?: Partial<GeneticUnit>): GeneticUnit {
+    private newUnit(base?: GeneticUnit): GeneticUnit {
         return {
-            genome: base ? base.genome! : generate(ARMS_QUANTITY * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS),
+            genome: base ? base.genome : generate(ARMS_QUANTITY * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS),
             randomSeed: Math.random().toString(36).substr(2),
         }
     }
