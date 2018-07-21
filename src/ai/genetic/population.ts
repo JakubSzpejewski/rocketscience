@@ -3,8 +3,8 @@ import { ARMS_QUANTITY, HIDDEN_LAYER, OUTPUTS } from "../rocket/rocket";
 import { Network } from 'synaptic';
 
 const POPULATION_SIZE = 100;
-const CHANCE_TO_CROSSOVER = 0.1;
-const CHANCE_TO_MUTATE = 0.05;
+const CHANCE_TO_CROSSOVER = 0.3;
+const CHANCE_TO_MUTATE = 0.1;
 
 export interface GeneticUnit {
     genome: Genome;
@@ -56,6 +56,9 @@ export class Population {
             for (const unit of unitsToReproduce) {
                 nextPopulation.push(this.newUnit({ genome: mutate(unit.genome, CHANCE_TO_MUTATE) }));
             }
+            nextPopulation.push(this.newUnit());
+            nextPopulation.push(this.newUnit());
+            nextPopulation.push(this.newUnit());
         } while (nextPopulation.length < this.currentPopulation.length)
         return this.currentPopulation = nextPopulation;
     }

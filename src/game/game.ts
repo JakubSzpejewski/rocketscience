@@ -72,6 +72,9 @@ export class Game {
     }
 
     public startGame(): void {
+        if (this.state === GameState.running) {
+            throw new Error('Game already running');
+        }
         this.points = 0;
         this.state = GameState.running;
 

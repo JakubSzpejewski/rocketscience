@@ -1,6 +1,6 @@
 import { Game, GameState } from './game/game';
 import { Hud } from './game/hud/hud';
-import { Population } from './ai/genetic/population';
+import { Population, GeneticUnit } from './ai/genetic/population';
 import { AiRocket } from './ai/rocket/rocket';
 
 export const CANVAS_WIDTH: number = 1500;
@@ -45,8 +45,34 @@ let startHumanGame = () => {
     });
 }
 
+let inspectGame = (geneticUnit: GeneticUnit): p5 => {
+    return new p5((p: p5) => {
+        game = new Game(geneticUnit);
+        p.setup = () => {
+            const canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+            (<any>canvas).parent('canvasContainer');
+            game.startGame();
+        };
 
-let startAiGame = (generations: number) => {
+        p.draw = () => {
+
+            p.background(51);
+
+            if (game.state === GameState.running) {
+                game.update(p);
+                game.draw(p);
+
+                hud.drawPoints(p);
+            } else if (game.state === GameState.over) {
+                game.draw(p);
+                hud.drawPoints(p);
+            }
+        }
+    });
+}
+
+
+let startAiGame = (generations: number): Population => {
     const population = new Population();
     for (let i = 0; i < generations; i++) {
         console.log(population);
@@ -69,6 +95,7 @@ let startAiGame = (generations: number) => {
         }
         population.newGeneration();
     }
+    return population;
 }
 
 
@@ -76,4 +103,12 @@ let startAiGame = (generations: number) => {
 (<any>window).startHumanGame = startHumanGame;
 (<any>window).startAiGame = startAiGame;
 
-startAiGame(10);
+const population = startAiGame(10);
+const flatPopulation: GeneticUnit[] = [];
+population.generations.map(v => flatPopulation.push(...v));
+flatPopulation.sort((a, b) => {
+    if (a.fitness! > b.fitness!) return -1;
+    if (a.fitness! < b.fitness!) return 1;
+    return 0;
+});
+inspectGame(flatPopulation[0]);
