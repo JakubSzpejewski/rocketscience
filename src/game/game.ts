@@ -31,9 +31,6 @@ export class Game {
     constructor(
         private geneticUnit?: GeneticUnit,
     ) {
-        if (geneticUnit) {
-            (<any>Math).seedrandom(geneticUnit.randomSeed);
-        }
 
     }
 

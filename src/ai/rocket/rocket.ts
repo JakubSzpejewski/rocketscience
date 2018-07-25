@@ -2,7 +2,7 @@ import { game, CANVAS_HEIGHT, CANVAS_WIDTH } from "../../index";
 import { PIXELS_FROM_POSITION, Rocket, ANGLE_SPEED } from "../../game/rocket/rocket";
 import { Arm, ARM_LENGTH } from "./arm";
 import { Layer, Network, Neuron } from 'synaptic';
-import { Genome } from "../genetic/genome";
+import { Chromosome } from "../genetic/genome";
 import { GeneticUnit } from "../genetic/population";
 
 export const ARMS_QUANTITY = 16;
@@ -36,7 +36,7 @@ export class AiRocket extends Rocket {
         });
     }
 
-    private createPerceptron(genome: Genome): Network {
+    private createPerceptron(genome: Chromosome): Network {
         const inputs = new Layer(ARMS_QUANTITY);
         const hidden = new Layer(HIDDEN_LAYER);
         const output = new Layer(OUTPUTS);

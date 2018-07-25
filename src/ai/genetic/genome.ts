@@ -1,23 +1,24 @@
 
-export type Genome = number[];
+export type Chromosome = number[];
 
-export const generate = (length: number): Genome => {
+export const generate = (length: number): Chromosome => {
     const ret = [];
     for (let i = 0; i < length; i++) {
-        ret.push(Math.random() * .2 - .1);
+        const genome = Math.random() * 10 - 5;
+        ret.push(Math.round(genome * (Math.pow(10, 4))) / (Math.pow(10, 4)));
     }
     return ret;
 }
 
-export const mutate = (genome: Genome, chance: number): Genome => {
-    const ret: Genome = [];
+export const mutate = (genome: string[], chance: number): string[] => {
+    const ret: string[] = [];
     for (let v of genome) {
-        ret.push(Math.random() < chance ? -v : v);
+        ret.push(Math.random() < chance ? v === '1' ? '0' : '1' : v);
     }
     return ret;
 }
 
-export const crossover = (genome1: Genome, genome2: Genome): Genome[] => {
+export const crossover = (genome1: string[], genome2: string[]): string[][] => {
     const ret1 = [];
     const ret2 = [];
     if (genome1.length !== genome2.length) {

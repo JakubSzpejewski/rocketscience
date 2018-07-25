@@ -21,12 +21,14 @@ export class Asteroid extends GameObject {
         position?: p5.Vector,
     ) {
         super();
-
+        // (<any>Math).seedrandom('abc');
 
         this.position = position || this.rollStartPosition();
 
         const target = new p5.Vector(this.random(0, CANVAS_WIDTH), this.random(0, CANVAS_HEIGHT));
         this.direction = p5.Vector.sub(target, this.position).normalize();
+
+        // (<any>Math).seedrandom();
 
 
         for (const vertix of this.vertices) {
@@ -131,10 +133,13 @@ export class Asteroid extends GameObject {
                 if (this.size > 1) {
                     this.split();
                 }
-                // size 3 == 10 points
-                // size 2 == 30 points
-                // size 1 == 100 points
-                game.points += (25 * (this.size - 2) - 20) * (this.size - 3) + 10;
+                if (this.size === 3) {
+                    game.points += 10;
+                } else if (this.size === 2) {
+                    game.points += 20;
+                } else {
+                    game.points += 30;
+                }
                 return true;
             }
             default: {

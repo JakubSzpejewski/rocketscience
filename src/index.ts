@@ -71,21 +71,18 @@ let inspectGame = (geneticUnit: GeneticUnit): p5 => {
     });
 }
 
+const averageFitness: number[] = [];
 
-let startAiGame = (generations: number): Population => {
-    const population = new Population();
+let startAiGame = (generations: number, lastPopulation?: GeneticUnit[]): Population => {
+    const population = new Population(lastPopulation);
+    const processing = new p5((p: p5) => { p.draw = () => { p.noLoop() } });
     for (let i = 0; i < generations; i++) {
-        console.log(population);
         for (const geneticUnit of population.currentPopulation) {
             game = new Game(geneticUnit);
-
-            const processing = new p5((p: p5) => { p.draw = () => { p.noLoop() } });
-
             game.startGame();
             while (true) {
                 game.update(processing);
                 game.registerOnGameOver(() => {
-                    geneticUnit.perceptron = (<AiRocket>game.gameObjects[0]).perceptron;
                     geneticUnit.fitness = (<AiRocket>game.gameObjects[0]).getFitness();
                 });
                 if (game.state === GameState.over) {
@@ -93,22 +90,32 @@ let startAiGame = (generations: number): Population => {
                 }
             }
         }
-        population.newGeneration();
+        localStorage.setItem('population', JSON.stringify(population.currentPopulation));
+        console.log(population);
+        averageFitness.push(population.currentPopulation.reduce((prev: number, current) => prev + current.fitness!, 0) / population.currentPopulation.length);
+        if (i < generations - 1) {
+            population.newGeneration();
+        }
     }
     return population;
 }
 
-
-
 (<any>window).startHumanGame = startHumanGame;
 (<any>window).startAiGame = startAiGame;
 
-const population = startAiGame(10);
-const flatPopulation: GeneticUnit[] = [];
-population.generations.map(v => flatPopulation.push(...v));
-flatPopulation.sort((a, b) => {
+const lastPopulation = localStorage.getItem('population');
+console.log(lastPopulation);
+let parsedLastPopulation: GeneticUnit[] | undefined;
+if (lastPopulation) {
+    parsedLastPopulation = JSON.parse(lastPopulation);
+}
+const population = startAiGame(5, parsedLastPopulation);
+
+console.log(averageFitness);
+
+population.currentPopulation.sort((a, b) => {
     if (a.fitness! > b.fitness!) return -1;
     if (a.fitness! < b.fitness!) return 1;
     return 0;
 });
-inspectGame(flatPopulation[0]);
+inspectGame(population.currentPopulation[0]);

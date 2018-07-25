@@ -1,13 +1,12 @@
-import { Genome, generate, crossover, mutate } from "./genome";
+import { Chromosome, generate, crossover, mutate } from "./genome";
 import { ARMS_QUANTITY, HIDDEN_LAYER, OUTPUTS } from "../rocket/rocket";
 import { Network } from 'synaptic';
 
 const POPULATION_SIZE = 100;
-const CHANCE_TO_CROSSOVER = 0.3;
-const CHANCE_TO_MUTATE = 0.1;
+const CHANCE_TO_MUTATE = 0.008;
 
 export interface GeneticUnit {
-    genome: Genome;
+    genome: Chromosome;
     randomSeed?: string;
     perceptron?: Network
     fitness?: number;
@@ -15,17 +14,19 @@ export interface GeneticUnit {
 
 export class Population {
     public currentPopulation: GeneticUnit[] = [];
-    public generations: GeneticUnit[][] = [];
 
 
     constructor(
-
+        populationToInit?: GeneticUnit[],
     ) {
+        if (populationToInit) {
+            this.currentPopulation = populationToInit;
+            this.newGeneration();
+        }
         if (!this.currentPopulation || !this.currentPopulation.length) {
             for (let i = 0; i < POPULATION_SIZE; i++) {
                 this.currentPopulation.push(this.newUnit());
             }
-            this.generations.push(this.currentPopulation);
         }
     }
 
@@ -38,27 +39,43 @@ export class Population {
 
     public newGeneration(): GeneticUnit[] {
         const nextPopulation: GeneticUnit[] = [];
-
-        this.generations.push(this.currentPopulation);
         for (const geneticUnit of this.currentPopulation) {
             if (geneticUnit.fitness === undefined) {
                 throw new Error('Need to calculate fitness for: ' + geneticUnit);
             }
         }
         do {
-            let unitsToReproduce = [this.newUnit({ genome: this.select(this.currentPopulation).genome }), this.newUnit({ genome: this.select(this.currentPopulation).genome })];
-            nextPopulation.push(...unitsToReproduce);
 
-            if (Math.random() < CHANCE_TO_CROSSOVER) {
-                const crossovered = crossover(unitsToReproduce[0].genome, unitsToReproduce[1].genome);
-                unitsToReproduce = [this.newUnit({ genome: crossovered[0] }), this.newUnit({ genome: crossovered[1] })];
-            }
+            let unitsToReproduce = [this.newUnit({ genome: this.select(this.currentPopulation).genome }), this.newUnit({ genome: this.select(this.currentPopulation).genome })];
+
+            let unitsToReproduceGenomeAsBits: string[][] = [];
+
             for (const unit of unitsToReproduce) {
-                nextPopulation.push(this.newUnit({ genome: mutate(unit.genome, CHANCE_TO_MUTATE) }));
+                const weightBits = unit.genome.map(v => ((v + 5) * ((<any>Number).MAX_SAFE_INTEGER / 10)).toString(2));
+                unitsToReproduceGenomeAsBits.push(weightBits.map(v => {
+                    while (v.length < 53) {
+                        v += '0';
+                    }
+                    return v;
+                }).join('').split(''));
             }
-            nextPopulation.push(this.newUnit());
-            nextPopulation.push(this.newUnit());
-            nextPopulation.push(this.newUnit());
+
+            const crossovered = crossover(unitsToReproduceGenomeAsBits[0], unitsToReproduceGenomeAsBits[1]);
+            const mutated: string[][] = [];
+            for (const unit of crossovered) {
+                mutated.push(mutate(unit, CHANCE_TO_MUTATE));
+            }
+            const genome: number[][] = [];
+            for (const genomeAsBit of mutated) {
+                const bitString = genomeAsBit.join('');
+                const genomesAsBitsArray = bitString.match(new RegExp('.{1,' + 53 + '}', 'g'));
+                if (!genomesAsBitsArray) {
+                    throw new Error('something');
+                }
+                genome.push(genomesAsBitsArray.map(v => (parseInt(v, 2) / ((<any>Number).MAX_SAFE_INTEGER / 10) - 5)));
+            }
+            unitsToReproduce = [this.newUnit({ genome: genome[0] }), this.newUnit({ genome: genome[1] })];
+
         } while (nextPopulation.length < this.currentPopulation.length)
         return this.currentPopulation = nextPopulation;
     }
