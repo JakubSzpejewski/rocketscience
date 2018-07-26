@@ -4,8 +4,7 @@ export type Chromosome = number[];
 export const generate = (length: number): Chromosome => {
     const ret = [];
     for (let i = 0; i < length; i++) {
-        const genome = Math.random() * 10 - 5;
-        ret.push(Math.round(genome * (Math.pow(10, 4))) / (Math.pow(10, 4)));
+        ret.push(Math.random() * 10 - 5);
     }
     return ret;
 }

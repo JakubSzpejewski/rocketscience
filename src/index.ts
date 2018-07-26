@@ -71,16 +71,21 @@ let inspectGame = (geneticUnit: GeneticUnit): p5 => {
     });
 }
 
+const wait = (): Promise<void> => {
+    return new Promise(r => window.setTimeout(r, 0));
+}
+
 const averageFitness: number[] = [];
 
-let startAiGame = (generations: number, lastPopulation?: GeneticUnit[]): Population => {
+let startAiGame = async (generations: number, lastPopulation?: GeneticUnit[]): Promise<Population> => {
     const population = new Population(lastPopulation);
     const processing = new p5((p: p5) => { p.draw = () => { p.noLoop() } });
     for (let i = 0; i < generations; i++) {
         for (const geneticUnit of population.currentPopulation) {
             game = new Game(geneticUnit);
             game.startGame();
-            while (true) {
+            let current, timer = Date.now();
+            while (current = Date.now()) {
                 game.update(processing);
                 game.registerOnGameOver(() => {
                     geneticUnit.fitness = (<AiRocket>game.gameObjects[0]).getFitness();
@@ -88,6 +93,11 @@ let startAiGame = (generations: number, lastPopulation?: GeneticUnit[]): Populat
                 if (game.state === GameState.over) {
                     break;
                 }
+                if (current - timer > 100) {
+                    timer = Date.now();
+                    await wait();
+                }
+
             }
         }
         localStorage.setItem('population', JSON.stringify(population.currentPopulation));
@@ -109,13 +119,16 @@ let parsedLastPopulation: GeneticUnit[] | undefined;
 if (lastPopulation) {
     parsedLastPopulation = JSON.parse(lastPopulation);
 }
-const population = startAiGame(5, parsedLastPopulation);
+const populationPromise = startAiGame(50, parsedLastPopulation);
 
-console.log(averageFitness);
+populationPromise.then((population) => {
+    console.log(averageFitness);
 
-population.currentPopulation.sort((a, b) => {
-    if (a.fitness! > b.fitness!) return -1;
-    if (a.fitness! < b.fitness!) return 1;
-    return 0;
+    population.currentPopulation.sort((a, b) => {
+        if (a.fitness! > b.fitness!) return -1;
+        if (a.fitness! < b.fitness!) return 1;
+        return 0;
+    });
+    inspectGame(population.currentPopulation[0]);
+
 });
-inspectGame(population.currentPopulation[0]);

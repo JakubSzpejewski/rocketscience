@@ -2,8 +2,8 @@ import { Chromosome, generate, crossover, mutate } from "./genome";
 import { ARMS_QUANTITY, HIDDEN_LAYER, OUTPUTS } from "../rocket/rocket";
 import { Network } from 'synaptic';
 
-const POPULATION_SIZE = 100;
-const CHANCE_TO_MUTATE = 0.008;
+const POPULATION_SIZE = 10;
+const CHANCE_TO_MUTATE = -1;
 
 export interface GeneticUnit {
     genome: Chromosome;
@@ -11,6 +11,8 @@ export interface GeneticUnit {
     perceptron?: Network
     fitness?: number;
 }
+
+const fiftyThreeZeroes = '00000000000000000000000000000000000000000000000000000';
 
 export class Population {
     public currentPopulation: GeneticUnit[] = [];
@@ -51,13 +53,7 @@ export class Population {
             let unitsToReproduceGenomeAsBits: string[][] = [];
 
             for (const unit of unitsToReproduce) {
-                const weightBits = unit.genome.map(v => ((v + 5) * ((<any>Number).MAX_SAFE_INTEGER / 10)).toString(2));
-                unitsToReproduceGenomeAsBits.push(weightBits.map(v => {
-                    while (v.length < 53) {
-                        v += '0';
-                    }
-                    return v;
-                }).join('').split(''));
+                unitsToReproduceGenomeAsBits.push(unit.genome.map(v => (fiftyThreeZeroes + Math.round(((v + 5) * ((<any>Number).MAX_SAFE_INTEGER / 10))).toString(2)).substr(-53)).join('').split(''));
             }
 
             const crossovered = crossover(unitsToReproduceGenomeAsBits[0], unitsToReproduceGenomeAsBits[1]);
@@ -66,15 +62,19 @@ export class Population {
                 mutated.push(mutate(unit, CHANCE_TO_MUTATE));
             }
             const genome: number[][] = [];
-            for (const genomeAsBit of mutated) {
-                const bitString = genomeAsBit.join('');
-                const genomesAsBitsArray = bitString.match(new RegExp('.{1,' + 53 + '}', 'g'));
-                if (!genomesAsBitsArray) {
-                    throw new Error('something');
+            for (const mutatedUnit of mutated) {
+                const genomesAsBitsArray: string[] = [];
+                while(mutatedUnit.length > 0) {
+                    const cutgenome = mutatedUnit.splice(0, 53).join('');
+                    if(cutgenome.length > 53) {
+                        throw new Error('eee');
+                    }
+                    genomesAsBitsArray.push(cutgenome);
                 }
-                genome.push(genomesAsBitsArray.map(v => (parseInt(v, 2) / ((<any>Number).MAX_SAFE_INTEGER / 10) - 5)));
+
+                genome.push(genomesAsBitsArray.map(v => ((parseInt(v, 2)) / ((<any>Number).MAX_SAFE_INTEGER / 10)) - 5));
             }
-            unitsToReproduce = [this.newUnit({ genome: genome[0] }), this.newUnit({ genome: genome[1] })];
+            nextPopulation.push(...[this.newUnit({ genome: genome[0] }), this.newUnit({ genome: genome[1] })]);
 
         } while (nextPopulation.length < this.currentPopulation.length)
         return this.currentPopulation = nextPopulation;
@@ -83,7 +83,7 @@ export class Population {
     private select(population: GeneticUnit[]): GeneticUnit {
         let weight = Math.random() * population.reduce((prev: number, curr) => prev + curr.fitness!, 0);
 
-        for (const geneticUnit of this.currentPopulation) {
+        for (const geneticUnit of population) {
             if (weight < geneticUnit.fitness!) {
                 return geneticUnit;
             }
