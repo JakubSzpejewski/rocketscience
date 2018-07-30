@@ -17,7 +17,7 @@ const ACCELERATION: number = 0.1;
 const MAX_SPEED: number = 6;
 const MIN_SPEED: number = 0;
 
-const SHOOT_INTERVAL: number = 500;
+const SHOOT_INTERVAL: number = 300;
 
 
 
@@ -49,6 +49,7 @@ export class Rocket extends GameObject {
         if (!this.checkWindowBoundaries()) {
             this.onDestroy();
         }
+        this.lastShotCounter++;
         if (this.speed < MIN_SPEED) {
             this.speed = MIN_SPEED;
         }
@@ -83,7 +84,7 @@ export class Rocket extends GameObject {
             this.shape, true);
     }
 
-    private lastShotTime: number = 0;
+    private lastShotCounter: number = 0;
 
     private processInput(_p: p5): void {
         // if (p.keyIsDown(RIGHT_ARROW)) {
@@ -122,9 +123,9 @@ export class Rocket extends GameObject {
         this.angle += diff;
     }
 
-    public shoot(p: p5): void {
-        if (this.lastShotTime + SHOOT_INTERVAL < p.millis()) {
-            this.lastShotTime = p.millis();
+    public shoot(): void {
+        if (this.lastShotCounter > SHOOT_INTERVAL) {
+            this.lastShotCounter = 0;
             new Missile(new p5.Vector(this.position.x, this.position.y - PIXELS_FROM_POSITION), this.direction.copy());
         }
     }

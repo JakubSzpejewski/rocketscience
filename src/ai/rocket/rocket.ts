@@ -22,9 +22,9 @@ export class AiRocket extends Rocket {
         for (let i = 0; i < ARMS_QUANTITY; i++) {
             this.arms[i] = new Arm(2 * Math.PI / ARMS_QUANTITY * i);
         }
-        game.registerOnUpdate((p: p5) => {
+        game.registerOnUpdate(() => {
             this.updateArms();
-            this.getDecision(p);
+            this.getDecision();
         });
         game.registerOnDraw((p: p5) => {
             for (const arm of this.arms) {
@@ -76,10 +76,10 @@ export class AiRocket extends Rocket {
             arm.collisions(game.gameObjects);
         }
     }
-    private getDecision(p: p5): void {
+    private getDecision(): void {
         const distances = this.arms.map(v => v.distance);
 
-        const normalize = (v: number) => (v / ARM_LENGTH) * 12 - 6;
+        const normalize = (v: number) => (v / ARM_LENGTH) * 2 - 1;
         const normalized = distances.map(normalize);
 
         const output = this.perceptron.activate(normalized);
@@ -97,7 +97,7 @@ export class AiRocket extends Rocket {
             this.changeAngle(-ANGLE_SPEED);
         }
         if (Math.round(output[3])) {
-            this.shoot(p);
+            this.shoot();
         }
     }
 

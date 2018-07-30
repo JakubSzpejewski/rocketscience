@@ -2,8 +2,9 @@ import { Chromosome, generate, crossover, mutate } from "./genome";
 import { ARMS_QUANTITY, HIDDEN_LAYER, OUTPUTS } from "../rocket/rocket";
 import { Network } from 'synaptic';
 
-const POPULATION_SIZE = 10;
-const CHANCE_TO_MUTATE = -1;
+const POPULATION_SIZE = 100;
+const CHANCE_TO_CROSSOVER = 0.65;
+const CHANCE_TO_MUTATE = 0.001;
 
 export interface GeneticUnit {
     genome: Chromosome;
@@ -35,7 +36,7 @@ export class Population {
     private newUnit(base?: GeneticUnit): GeneticUnit {
         return {
             genome: base ? base.genome : generate(ARMS_QUANTITY * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS),
-            randomSeed: Math.random().toString(36).substr(2),
+            randomSeed: 'abecadlo'//Math.random().toString(36).substr(2),
         }
     }
 
@@ -56,17 +57,19 @@ export class Population {
                 unitsToReproduceGenomeAsBits.push(unit.genome.map(v => (fiftyThreeZeroes + Math.round(((v + 5) * ((<any>Number).MAX_SAFE_INTEGER / 10))).toString(2)).substr(-53)).join('').split(''));
             }
 
-            const crossovered = crossover(unitsToReproduceGenomeAsBits[0], unitsToReproduceGenomeAsBits[1]);
+            if (Math.random() < CHANCE_TO_CROSSOVER) {
+                unitsToReproduceGenomeAsBits = crossover(unitsToReproduceGenomeAsBits[0], unitsToReproduceGenomeAsBits[1]);
+            }
             const mutated: string[][] = [];
-            for (const unit of crossovered) {
+            for (const unit of unitsToReproduceGenomeAsBits) {
                 mutated.push(mutate(unit, CHANCE_TO_MUTATE));
             }
             const genome: number[][] = [];
             for (const mutatedUnit of mutated) {
                 const genomesAsBitsArray: string[] = [];
-                while(mutatedUnit.length > 0) {
+                while (mutatedUnit.length > 0) {
                     const cutgenome = mutatedUnit.splice(0, 53).join('');
-                    if(cutgenome.length > 53) {
+                    if (cutgenome.length > 53) {
                         throw new Error('eee');
                     }
                     genomesAsBitsArray.push(cutgenome);

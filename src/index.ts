@@ -47,6 +47,7 @@ let startHumanGame = () => {
 
 let inspectGame = (geneticUnit: GeneticUnit): p5 => {
     return new p5((p: p5) => {
+        (<any>Math).seedrandom(geneticUnit.randomSeed);
         game = new Game(geneticUnit);
         p.setup = () => {
             const canvas = p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -82,6 +83,7 @@ let startAiGame = async (generations: number, lastPopulation?: GeneticUnit[]): P
     const processing = new p5((p: p5) => { p.draw = () => { p.noLoop() } });
     for (let i = 0; i < generations; i++) {
         for (const geneticUnit of population.currentPopulation) {
+            (<any>Math).seedrandom(geneticUnit.randomSeed);
             game = new Game(geneticUnit);
             game.startGame();
             let current, timer = Date.now();
@@ -102,6 +104,7 @@ let startAiGame = async (generations: number, lastPopulation?: GeneticUnit[]): P
         }
         localStorage.setItem('population', JSON.stringify(population.currentPopulation));
         console.log(population);
+        (<any>Math).seedrandom();
         averageFitness.push(population.currentPopulation.reduce((prev: number, current) => prev + current.fitness!, 0) / population.currentPopulation.length);
         if (i < generations - 1) {
             population.newGeneration();
@@ -117,9 +120,10 @@ const lastPopulation = localStorage.getItem('population');
 console.log(lastPopulation);
 let parsedLastPopulation: GeneticUnit[] | undefined;
 if (lastPopulation) {
-    parsedLastPopulation = JSON.parse(lastPopulation);
+    parsedLastPopulation = JSON.parse(lastPopulation);    
 }
-const populationPromise = startAiGame(50, parsedLastPopulation);
+
+const populationPromise = startAiGame(10, parsedLastPopulation);
 
 populationPromise.then((population) => {
     console.log(averageFitness);

@@ -21,14 +21,11 @@ export class Asteroid extends GameObject {
         position?: p5.Vector,
     ) {
         super();
-        // (<any>Math).seedrandom('abc');
 
         this.position = position || this.rollStartPosition();
 
         const target = new p5.Vector(this.random(0, CANVAS_WIDTH), this.random(0, CANVAS_HEIGHT));
         this.direction = p5.Vector.sub(target, this.position).normalize();
-
-        // (<any>Math).seedrandom();
 
 
         for (const vertix of this.vertices) {
@@ -44,10 +41,10 @@ export class Asteroid extends GameObject {
         let x: number;
         let y: number;
         // true - top/bottom, false - right/left
-        if (Math.round(Math.random())) {
+        if (Math.round(this.random(0, 1))) {
             x = this.random(-CANVAS_OFFSET, CANVAS_WIDTH + CANVAS_OFFSET);
             // true - top, false - bottom
-            if (Math.round(Math.random())) {
+            if (Math.round(this.random(0, 1))) {
                 y = this.random(-CANVAS_OFFSET, 0);
             } else {
                 y = this.random(CANVAS_HEIGHT, CANVAS_HEIGHT + CANVAS_OFFSET);
@@ -55,7 +52,7 @@ export class Asteroid extends GameObject {
         } else {
             y = this.random(-CANVAS_OFFSET, CANVAS_HEIGHT + CANVAS_OFFSET);
             // true - left, false - right
-            if (Math.round(Math.random())) {
+            if (Math.round(this.random(0, 1))) {
                 x = this.random(-CANVAS_OFFSET, 0);
             } else {
                 x = this.random(CANVAS_WIDTH, CANVAS_WIDTH + CANVAS_OFFSET);
