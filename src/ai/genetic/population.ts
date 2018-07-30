@@ -2,7 +2,7 @@ import { Chromosome, generate, crossover, mutate } from "./genome";
 import { INPUT_LAYER, HIDDEN_LAYER, OUTPUTS } from "../rocket/rocket";
 import { Network } from 'synaptic';
 
-const POPULATION_SIZE = 20;
+const POPULATION_SIZE = 200;
 const CHANCE_TO_CROSSOVER = 0.65;
 const CHANCE_TO_MUTATE = 0.001;
 
@@ -36,7 +36,7 @@ export class Population {
     private newUnit(base?: GeneticUnit): GeneticUnit {
         return {
             genome: base ? base.genome : generate(INPUT_LAYER * HIDDEN_LAYER + HIDDEN_LAYER * OUTPUTS),
-            randomSeed: 'abecadlo'//Math.random().toString(36).substr(2),
+            randomSeed: 'pqoskdwja'//Math.random().toString(36).substr(2),
         }
     }
 

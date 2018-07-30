@@ -65,7 +65,20 @@ export class AiRocket extends Rocket {
     }
 
     private getClosestAsteroids(count: number): GameObject[] {
-        return game.gameObjects.filter(v => v.tag === 'asteroid').slice(0, count);
+        return game.gameObjects
+            .filter(v => v.tag === 'asteroid')
+            .sort((a, b) => {
+                const distA = p5.Vector.dist(this.position, a.position);
+                const distB = p5.Vector.dist(this.position, b.position);
+                if (distA < distB) {
+                    return 1;
+                } else if (distA > distB) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            })
+            .slice(0, count);
     }
 
     private getDecision(): void {
@@ -96,7 +109,7 @@ export class AiRocket extends Rocket {
             output[1] === NaN ||
             output[2] === NaN ||
             output[3] === NaN) {
-                debugger;
+            debugger;
         }
 
         if (Math.round(output[0])) {
