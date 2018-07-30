@@ -1,16 +1,20 @@
-import { game, CANVAS_HEIGHT, CANVAS_WIDTH } from "../../index";
-import { PIXELS_FROM_POSITION, Rocket, ANGLE_SPEED } from "../../game/rocket/rocket";
-import { Arm, ARM_LENGTH } from "./arm";
+import { game } from "../../index";
+import { Rocket, ANGLE_SPEED } from "../../game/rocket/rocket";
 import { Layer, Network, Neuron } from 'synaptic';
 import { Chromosome } from "../genetic/genome";
 import { GeneticUnit } from "../genetic/population";
+import { GameObject } from "../../game/utils/gameObject";
 
-export const ARMS_QUANTITY = 16;
-export const HIDDEN_LAYER = 10;
+const CLOSEST_ASTEROIDS_QUANTITY = 10;
+export const INPUT_LAYER =
+    2 /* Position to screen bounds */ +
+    2 /* Direction */ +
+    CLOSEST_ASTEROIDS_QUANTITY * 2/* Angle to closests asteroids */ +
+    CLOSEST_ASTEROIDS_QUANTITY/* Distance to closests asteroids */;
 export const OUTPUTS = 4;
+export const HIDDEN_LAYER = (INPUT_LAYER + OUTPUTS) / 2;
 
 export class AiRocket extends Rocket {
-    public arms: Arm[] = [];
     public perceptron: Network;
 
     constructor(
@@ -19,25 +23,17 @@ export class AiRocket extends Rocket {
         super(x, y);
 
         this.perceptron = this.createPerceptron(geneticUnit.genome);
-        for (let i = 0; i < ARMS_QUANTITY; i++) {
-            this.arms[i] = new Arm(2 * Math.PI / ARMS_QUANTITY * i);
-        }
         game.registerOnUpdate(() => {
-            this.updateArms();
             this.getDecision();
         });
-        game.registerOnDraw((p: p5) => {
-            for (const arm of this.arms) {
-                arm.draw(p);
-            }
+        game.registerOnDraw((_p: p5) => {
         });
         game.registerOnGameOver(() => {
-            this.arms = [];
         });
     }
 
     private createPerceptron(genome: Chromosome): Network {
-        const inputs = new Layer(ARMS_QUANTITY);
+        const inputs = new Layer(INPUT_LAYER);
         const hidden = new Layer(HIDDEN_LAYER);
         const output = new Layer(OUTPUTS);
 
@@ -57,7 +53,7 @@ export class AiRocket extends Rocket {
             const keys = Object.keys((<any>neuron).connections.projected);
             for (let j = 0; j < keys.length; j++) {
                 const connection: Neuron.Connection = (<any>neuron).connections.projected[keys[j]];
-                connection.weight = genome[ARMS_QUANTITY * HIDDEN_LAYER + i * keys.length + j];
+                connection.weight = genome[INPUT_LAYER * HIDDEN_LAYER + i * keys.length + j];
             }
         }
 
@@ -68,22 +64,40 @@ export class AiRocket extends Rocket {
         })
     }
 
-    private updateArms(): void {
-        for (const arm of this.arms) {
-            arm.update(p5.Vector.add(this.position, new p5.Vector(0, -PIXELS_FROM_POSITION)));
-
-            arm.checkOutOfBounds([new p5.Vector(0, 0), new p5.Vector(CANVAS_WIDTH, 0), new p5.Vector(CANVAS_WIDTH, CANVAS_HEIGHT), new p5.Vector(0, CANVAS_HEIGHT)]);
-            arm.collisions(game.gameObjects);
-        }
+    private getClosestAsteroids(count: number): GameObject[] {
+        return game.gameObjects.filter(v => v.tag === 'asteroid').slice(0, count);
     }
+
     private getDecision(): void {
-        const distances = this.arms.map(v => v.distance);
+        const closestAsteroidsPositions: (p5.Vector | undefined)[] = this.getClosestAsteroids(CLOSEST_ASTEROIDS_QUANTITY).map(v => v.position);
+        while (closestAsteroidsPositions.length < CLOSEST_ASTEROIDS_QUANTITY) {
+            closestAsteroidsPositions.push(undefined);
+        }
 
-        const normalize = (v: number) => (v / ARM_LENGTH) * 2 - 1;
-        const normalized = distances.map(normalize);
+        const input: number[] = [
+            this.position.x,
+            this.position.y,
+            this.direction.x,
+            this.direction.y,
+        ];
+        for (const position of closestAsteroidsPositions) {
+            if (position) {
+                const angle = p5.Vector.sub(this.position, position).normalize();
+                const distance = p5.Vector.dist(this.position, position);
+                input.push(angle.x, angle.y, distance);
+            } else {
+                input.push(-1, -1, -1);
+            }
+        }
 
-        const output = this.perceptron.activate(normalized);
+        const output = this.perceptron.activate(input);
 
+        if (output[0] === NaN ||
+            output[1] === NaN ||
+            output[2] === NaN ||
+            output[3] === NaN) {
+                debugger;
+        }
 
         if (Math.round(output[0])) {
             this.accelerate();
